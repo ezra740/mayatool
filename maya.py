@@ -10,7 +10,7 @@ if cmds.window(windowName, exists=True):
 
     
 
-window = cmds.window(windowName, resizeToFitChildren=True, sizeable=True, widthHeight=(180,200))
+window = cmds.window(windowName, resizeToFitChildren=True, sizeable=False, widthHeight=(180,200))
 cmds.columnLayout(adjustableColumn=True, rowSpacing=100)
 form = cmds.formLayout()
 
@@ -31,8 +31,7 @@ def findName(*args):
     else:
         cmds.warning(f"Object '{ObjName}' does not exist")
     cmds.textField(ObjFind, edit=True, text="")
-    
-    
+
 cmds.button("Find all named:", command=findName)
 ObjFind = cmds.textField(w=130)
 cmds.setParent('..')
@@ -42,7 +41,7 @@ cmds.setParent('..')
 row2 = cmds.rowLayout(numberOfColumns=2, columnWidth=(160, 200), adjustableColumn=2)
 cmds.formLayout(form, edit = True, attachControl = [(row2,'top', 10, row1)], attachForm =[(row2, 'left', 0)])
 
-#Replacing the Namem
+#Replacing the Name
 def rename(*args):
     ObjRename = cmds.textField(ObjNewName, query=True, text=True)
     selected = cmds.ls(selection=True)
@@ -65,6 +64,24 @@ ObjNewName = cmds.textField()
 cmds.setParent('..')
     
 
+row3 = cmds.rowLayout(numberOfColumns=2, columnWidth=(160, 200), adjustableColumn=2)
+cmds.formLayout(form, edit = True, attachControl = [(row3,'top', 45, row1)], attachForm =[(row3, 'left', 0)])
+
+#Deleting the "pasted__"
+def deletePaste(*args):
+    pasted = cmds.ls('pasted__*', type = 'transform')
+    if pasted:
+        cmds.select(pasted)
+    for obj in pasted:
+        clearPaste = obj.replace('pasted__', '', 1)
+        cmds.rename(obj, clearPaste)
+        print("Removed all pasted__")
+
+cmds.button("Remove 'pasted__'", w=220, command=deletePaste)
+cmds.setParent('..')
 
 
-cmds.showWindow(window)
+
+
+#Adding Prefixes and Suffixes
+
