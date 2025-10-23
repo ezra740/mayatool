@@ -10,8 +10,8 @@ if cmds.window(windowName, exists=True):
 
     
 
-window = cmds.window(windowName, resizeToFitChildren=True, sizeable=False, widthHeight=(180,200))
-cmds.columnLayout(adjustableColumn=True, rowSpacing=100)
+window = cmds.window(windowName, resizeToFitChildren=True, sizeable=True, widthHeight=(300,200))
+cmds.columnLayout(adjustableColumn=False, rowSpacing=100)
 form = cmds.formLayout()
 
 
@@ -32,8 +32,8 @@ def findName(*args):
         cmds.warning(f"Object '{ObjName}' does not exist")
     cmds.textField(ObjFind, edit=True, text="")
 
-cmds.button("Find all named:", command=findName)
-ObjFind = cmds.textField(w=130)
+cmds.button("Find all named:", command=findName, w=125)
+ObjFind = cmds.textField(w=150)
 cmds.setParent('..')
 
 
@@ -60,11 +60,11 @@ def rename(*args):
     cmds.textField(ObjNewName, edit=True, text="")
 
 cmds.button("Replace Selected with:", command=rename)
-ObjNewName = cmds.textField()
+ObjNewName = cmds.textField(w=150)
 cmds.setParent('..')
     
 
-row3 = cmds.rowLayout(numberOfColumns=2, columnWidth=(160, 200), adjustableColumn=2)
+row3 = cmds.rowLayout(numberOfColumns=1, columnWidth=(160, 200), adjustableColumn=2)
 cmds.formLayout(form, edit = True, attachControl = [(row3,'top', 45, row1)], attachForm =[(row3, 'left', 0)])
 
 #Deleting the "pasted__"
@@ -77,11 +77,37 @@ def deletePaste(*args):
         cmds.rename(obj, clearPaste)
         print("Removed all pasted__")
 
-cmds.button("Remove 'pasted__'", w=220, command=deletePaste)
+cmds.button("Remove 'pasted__'", w=400, command=deletePaste)
 cmds.setParent('..')
 
+cmds.showWindow()
 
 
+#Adding Prefixes and Suffixes#
+row4 = cmds.rowLayout(numberOfColumns=5, columnWidth=(160, 200), adjustableColumn=2)
+cmds.formLayout(form, edit = True, attachControl = [(row4,'top', 80, row1)], attachForm =[(row4, 'left', 0)])
+cmds.button(label="Add prefix__:", command=lambda *args:addPrefix())
+prefixBox = cmds.textField()
+cmds.text(label="(Object)", w=50, backgroundColor=(0.3,0.3,0.3), font="boldLabelFont", ann="Your Selected Object")
+suffixBox = cmds.textField()
+cmds.button(label="Add :__suffix", command=lambda *args:addSuffix())
+cmds.setParent('..')
 
-#Adding Prefixes and Suffixes
+def addPrefix(*args):
+    prefix = cmds.textField(prefixBox, query=True, text=True)
+    selected = cmds.ls(selection=True)
+    for obj in selected:
+        cmds.rename(obj, f"{prefix}_{obj}")
+    cmds.textField(prefixBox, edit=True, text="")
+
+def addSuffix(*args):
+    suffix = cmds.textField(suffixBox, query=True, text=True)
+    selected = cmds.ls(selection=True)
+    for obj in selected:
+        cmds.rename(obj, f"{obj}_{suffix}")
+    cmds.textField(suffixBox, edit=True, text="")
+
+
+#Adding a automatic namer for their Node Type
+
 
