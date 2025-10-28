@@ -83,7 +83,7 @@ cmds.setParent('..')
 cmds.showWindow()
 
 
-#Adding Prefixes and Suffixes#
+#Adding Prefixes and Suffixes
 row4 = cmds.rowLayout(numberOfColumns=5, columnWidth=(160, 200), adjustableColumn=2)
 cmds.formLayout(form, edit = True, attachControl = [(row4,'top', 80, row1)], attachForm =[(row4, 'left', 0)])
 cmds.button(label="Add prefix__:", command=lambda *args:addPrefix())
@@ -108,6 +108,137 @@ def addSuffix(*args):
     cmds.textField(suffixBox, edit=True, text="")
 
 
-#Adding a automatic namer for their Node Type
+#Adding a selector for object type and sub-types
+
+row5 = cmds.rowLayout(numberOfColumns=3, columnWidth=(160, 200), adjustableColumn=True)
+cmds.formLayout(form, edit = True, attachControl = [(row5,'top', 115, row1)], attachForm =[(row5, 'left', 0)])
+
+#Option 1 would be geometry & sub_types
+def option1(selection):
+    none = cmds.select(clear=True)
+    geometry = cmds.ls(type='mesh')
+    nurbs = cmds.ls(type='nurbsSurface')
+    curves = cmds.ls(type='nurbsCurve')
+    if selection == "NONE":
+        cmds.select(none)
+    elif selection == "GEO":
+        cmds.select(geometry)
+    elif selection == "NURBS":
+        
+        cmds.select(nurbs)
+    elif selection == "CURVES":
+        cmds.select(curves)
+
+#Option 2 is for lights because they all have different type names
+def option2(selection):
+    cmds.select(clear=True)
+    amLight = cmds.ls(type='ambientLight')
+    dLight = cmds.ls(type='directionalLight')
+    pLight = cmds.ls(exactType='pointLight') #named it "exactType" because for some reason pointlight is the parent of volumelight
+    sLight = cmds.ls(type='spotLight')
+    arLight = cmds.ls(type ='areaLight')
+    vLight = cmds.ls(type = 'volumeLight')
+    if selection == "Ambient Light":
+        cmds.select(amLight)
+    elif selection == "Directional Light":
+        cmds.select(dLight)
+    elif selection == "Point Light":
+        cmds.select(pLight)
+    elif selection == "Spot Light":
+        cmds.select(sLight)
+    elif selection == "Area Light":
+        cmds.select(arLight)
+    elif selection == "Volume Light":
+        cmds.select(vLight)
+
+
+cmds.optionMenu(label="Select Geo sub-type:", changeCommand=option1)
+cmds.menuItem(label="NONE")
+cmds.menuItem(label="GEO")
+cmds.menuItem(label="NURBS")
+cmds.menuItem(label="CURVES")
+
+cmds.separator(width=5, style='none')
+
+cmds.optionMenu(label="Select Light sub-type:", changeCommand=option2)
+cmds.menuItem(label="NONE")
+cmds.menuItem(label="Ambient Light")
+cmds.menuItem(label="Directional Light")
+cmds.menuItem(label="Point Light")
+cmds.menuItem(label="Spot Light")
+cmds.menuItem(label="Area Light")
+cmds.menuItem(label="Volume Light")
+cmds.setParent('..')
+
+
+#Auto Apply Identity Suffixes 
+row6 = cmds.rowLayout(numberOfColumns=3, columnWidth=(160, 200), adjustableColumn=True)
+cmds.formLayout(form, edit = True, attachControl = [(row6,'top', 155, row1)], attachForm =[(row6, 'left', 0)])
+
+def autoSuffix(*args):
+    geo = cmds.ls(type='mesh')
+    nurbs = cmds.ls(type='nurbsSurface')
+    curves = cmds.ls(type='nurbsCurve')
+    lights = cmds.ls(type='light')
+    geometry = list(set(cmds.listRelatives(geo, parent=True, fullPath=False)))
+    nurbsSurf = list(set(cmds.listRelatives(nurbs, parent=True, fullPath=False)))
+    nurbsCurve = list(set(cmds.listRelatives(curves, parent=True, fullPath=False)))
+    lightings = list(set(cmds.listRelatives(lights, parent=True, fullPath=False)))
+    for obj in geometry:
+        if not obj.endswith("_GEO"):
+            addGeo = f"{obj}_GEO"
+            cmds.rename(obj, addGeo)
+    for obj in nurbsSurf:
+        if not obj.endswith("_NURBS"):
+            addNurbs = f"{obj}_NURBS"
+            cmds.rename(obj, addNurbs)
+    for obj in nurbsCurve:
+        if not obj.endswith("_CRV"):
+            addCurve = f"{obj}_CRV"
+            cmds.rename(obj, addCurve)
+    for obj in lightings:
+        if not obj.endswith("_LIGHT"):
+            addLight = f"{obj}_LIGHT"
+            cmds.rename(obj, addLight)
+
+def removeSuffix(*args):
+    geo = cmds.ls('*_GEO', type='transform')
+    if geo:
+        cmds.select(geo)
+    for obj in geo:
+        clearGeo = obj.replace('_GEO', '', 1)
+        cmds.rename(obj, clearGeo)
+
+    nurbs = cmds.ls('*_NURBS', type='transform')
+    if nurbs:
+        cmds.select(nurbs)
+    for obj in nurbs:
+        clearNurbs = obj.replace('_NURBS', '', 1)
+        cmds.rename(obj, clearNurbs)
+
+    curves = cmds.ls('*_CRV', type='transform')
+    if curves:
+        cmds.select(curves)
+    for obj in curves:
+        clearCurves = obj.replace('_CRV', '', 1)
+        cmds.rename(obj, clearCurves)
+
+    lights = cmds.ls('*_LIGHT', type='transform')
+    if lights:
+        cmds.select(lights)
+    for obj in lights:
+        clearLight = obj.replace('_LIGHT', '', 1)
+        cmds.rename(obj, clearLight)
+    cmds.select(clear=True)
+
+
+
+
+cmds.button("Add Naming Type Suffixes",command=autoSuffix, w=200, h=50, ann= "Adds all Naming Conventions Type" )
+cmds.separator(width=5, style='none')
+cmds.button("Remove Naming Type Suffixes", command = removeSuffix, w=200, h=50, ann= "Removes all Naming Conventions Type")
+cmds.setParent('..')
+
+cmds.showWindow()
 
 
