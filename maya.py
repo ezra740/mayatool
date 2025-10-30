@@ -1,5 +1,8 @@
 import maya.cmds as cmds
 
+#importing regex 29/10/25
+import re
+
 #Don't use Caps at start for some reason
 windowName = 'Simple Renamer Tool'
 
@@ -30,6 +33,7 @@ def findName(*args):
         cmds.select(matched)
         cmds.textField(ObjFind, edit=True, text="")
 
+
 cmds.button("Find all name:", command=findName, w=125)
 ObjFind = cmds.textField(w=150)
 
@@ -37,35 +41,44 @@ ObjFind = cmds.textField(w=150)
 cmds.setParent('..')
 
 
+subRow = cmds.rowLayout(numberOfColumns=1, columnWidth=(160, 200), adjustableColumn=2)
+cmds.formLayout(form, edit = True, attachControl = [(subRow,'top', 15, row1)], attachForm =[(subRow, 'left', 15)])
 
-row2 = cmds.rowLayout(numberOfColumns=2, columnWidth=(160, 200), adjustableColumn=2)
+def bringOriginName(*args):
+    selected = cmds.ls(selection=True, type='transform')
+    for obj in selected:
+        shapes = cmds.listRelatives(obj, shapes=True, fullPath=False) or []
+        if shapes:
+            shape = shapes[0]
+            base = shape.replace('Shape', '')
+            cmds.rename(obj, base)
+
+cmds.button(label='Clear', command=bringOriginName)
+cmds.setParent('..')
+
+row2 = cmds.rowLayout(numberOfColumns=3, columnWidth=(160, 200), adjustableColumn=2)
 cmds.formLayout(form, edit = True, attachControl = [(row2,'top', 10, row1)], attachForm =[(row2, 'left', 15)])
 
 #Replacing the Name
 def rename(*args):
     ObjRename = cmds.textField(ObjNewName, query=True, text=True)
-    selected = cmds.ls(selection=True)
-    if not selected:
-        cmds.warning("No Objects to be renamed")
-        return
-    if not ObjRename.strip():
-        cmds.warning("Enter a new name")
-        return
+    selected = cmds.ls(selection=True, type= 'transform')
     for i, obj in enumerate(selected, start=1):
         if len(selected) == 1:
-            newName = cmds.rename(obj, ObjRename)
+            newName = cmds.rename(obj, ObjRename, ignoreShape=True) 
         else:
             newName = cmds.rename(obj, f"{ObjRename}_{i:02d}")
             print(f"Renamed: {obj} to {newName}")
-    cmds.textField(ObjNewName, edit=True, text="")
+
 
 cmds.button("Replace Selected with:", command=rename)
 ObjNewName = cmds.textField(w=150)
+cmds.iconTextButton(style='iconOnly', image1='Erase.png', ann= "Clear Text Box", command=lambda *_: cmds.textField(ObjNewName, edit=True, text=''))
 cmds.setParent('..')
     
 
 row3 = cmds.rowLayout(numberOfColumns=1, columnWidth=(160, 200), adjustableColumn=2)
-cmds.formLayout(form, edit = True, attachControl = [(row3,'top', 10, row2)], attachForm =[(row3, 'left', 8)])
+cmds.formLayout(form, edit = True, attachControl = [(row3,'top', 10, row2)], attachForm =[(row3, 'left', 16)])
 
 #Deleting the "pasted__"
 def deletePaste(*args):
@@ -77,13 +90,13 @@ def deletePaste(*args):
         cmds.rename(obj, clearPaste)
         print("Removed all pasted__")
 
-cmds.button("Remove 'pasted__'", w=445, command=deletePaste, h= 35)
+cmds.button("Remove 'pasted__'", w=440, command=deletePaste, h= 35)
 cmds.setParent('..')
 
 
 #Adding Prefixes and Suffixes
-row4 = cmds.rowLayout(numberOfColumns=5, columnWidth=(160, 200), adjustableColumn=2)
-cmds.formLayout(form, edit = True, attachControl = [(row4,'top', 10, row3)], attachForm =[(row4, 'left', 25)])
+row4 = cmds.rowLayout(numberOfColumns=6, columnWidth=(160, 200), adjustableColumn=2)
+cmds.formLayout(form, edit = True, attachControl = [(row4,'top', 10, row3)], attachForm =[(row4, 'left', 30)])
 cmds.button(label="Add prefix__:", command=lambda *args:addPrefix())
 prefixBox = cmds.textField()
 cmds.text(label="(Object)", w=50, backgroundColor=(0.3,0.3,0.3), font="boldLabelFont", ann="Your Selected Object")
@@ -105,20 +118,30 @@ def addSuffix(*args):
         cmds.rename(obj, f"{obj}_{suffix}")
     cmds.textField(suffixBox, edit=True, text="")
 
-#Removes all custom prefix and suffixes and only keeps core name
-SubRow = cmds.rowLayout(numberOfColumns=5, columnWidth=(160, 200), adjustableColumn=2)
-cmds.formLayout(form, edit = True, attachControl = [(SubRow,'top', 15, row4)], attachForm =[(SubRow, 'left', 25)])
 
-def clearPrefixSuffix(*args):
-    selected = cmds.ls('_*', type = 'transform')
-    if selected:
-        cmds.select(selected)
-        for obj in selected:
-            clearPrefix = obj.replace('_*', '', 1)
-            cmds.rename(obj, clearPrefix)
+#Removes all duplicated/ empty underscores, unsure how to delete custom words behind or infront of it
+subRow2 = cmds.rowLayout(numberOfColumns=1, columnWidth=(160, 200), adjustableColumn=2)
+cmds.formLayout(form, edit = True, attachControl = [(subRow2,'top', 15, row4)], attachForm =[(subRow2, 'left', 15)])
+
+'''
+def clearDupeUnderscores(*args):
+    selected = cmds.ls(selection=True, type = 'transform')
+    for obj in selected:                                        #Normal method (Not regex)
+        clearUnderscore = obj.strip('__')
+        cmds.rename(obj, clearUnderscore)
+'''
+
+def cleanUnderscore(*args):
+    selected = cmds.ls(type='transform')
+    for obj in selected:
+        if cmds.lockNode(obj, query=True, lock=True)[0] or obj in ['persp', 'top', 'front', 'side']:
+            continue
+        cleanUnderscores = re.sub(r'_+','_', obj)
+        cleanUnderscores = re.sub(r'^_+|_+$', '', cleanUnderscores)
+        cmds.rename(obj, cleanUnderscores)
 
 
-cmds.button('Remove all Prefixes and Suffixes', w=400, h=30, command = clearPrefixSuffix)
+cmds.button(label='Remove all duplicated Underscores (___)', w= 440, h=30, command = cleanUnderscore, ann= "Removes all duplicated underscores next to each other leaving at least 1")
 cmds.setParent('..')
 
 #Adding a selector for object type and sub-types
@@ -126,12 +149,18 @@ cmds.setParent('..')
 row5 = cmds.rowLayout(numberOfColumns=3, columnWidth=(160, 200), adjustableColumn=True)
 cmds.formLayout(form, edit = True, attachControl = [(row5,'top', 60, row4)], attachForm =[(row5, 'left', 10)])
 
-#Option 1 would be geometry & sub_types
+#Option 1 would be to select geometry & sub_types
 def option1(selection):
     none = cmds.select(clear=True)
-    geometry = cmds.ls(type='mesh')
-    nurbs = cmds.ls(type='nurbsSurface')
-    curves = cmds.ls(type='nurbsCurve')
+    geometry_child = cmds.ls(type='mesh')
+    nurbs_child = cmds.ls(type='nurbsSurface')
+    curves_child = cmds.ls(type='nurbsCurve')
+    
+    geometry = cmds.listRelatives(geometry_child, parent=True, fullPath=False) or []
+    nurbs = cmds.listRelatives(nurbs_child, parent=True, fullPath=False) or []
+    curves = cmds.listRelatives(curves_child, parent=True, fullPath=False) or []
+#^^^Brings the shape nodes back to the transform nodes (Needed for the Revert function on line 36)^^^
+
     if selection == "NONE":
         cmds.select(none)
     elif selection == "GEO":
@@ -193,10 +222,10 @@ def autoSuffix(*args):
     nurbs = cmds.ls(type='nurbsSurface')
     curves = cmds.ls(type='nurbsCurve')
     lights = cmds.ls(type='light')
-    geometry = list(set(cmds.listRelatives(geo, parent=True, fullPath=False)))
-    nurbsSurf = list(set(cmds.listRelatives(nurbs, parent=True, fullPath=False)))
-    nurbsCurve = list(set(cmds.listRelatives(curves, parent=True, fullPath=False)))
-    lightings = list(set(cmds.listRelatives(lights, parent=True, fullPath=False)))
+    geometry = list(set(cmds.listRelatives(geo, parent=True, fullPath=False) or []))
+    nurbsSurf = list(set(cmds.listRelatives(nurbs, parent=True, fullPath=False) or []))
+    nurbsCurve = list(set(cmds.listRelatives(curves, parent=True, fullPath=False) or []))
+    lightings = list(set(cmds.listRelatives(lights, parent=True, fullPath=False) or []))    # Using an empty list if list relatives gives nothing
     for obj in geometry:
         if not obj.endswith("_GEO"):
             addGeo = f"{obj}_GEO"
