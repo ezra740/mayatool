@@ -299,12 +299,6 @@ def removePosSuffix(*args):
             cmds.rename(obj, clearBottom)
 
 
-
-
-def LaunchWindow(Dockable = False):
-
-    BuildWindowUI()
-
 def LaunchNonDockableWindow():
     myWindow = 'Maya_UI'
     if cmds.window(myWindow, ex=True):
@@ -312,10 +306,10 @@ def LaunchNonDockableWindow():
 
     cmds.window(myWindow, title= 'Simple Renamer Tool', resizeToFitChildren=True, sizeable=True, widthHeight=(300,200))
 
-    cmds.showWindow(myWindow)
-
     
     BuildWindowUI()
+
+    cmds.showWindow(myWindow)
 
 def BuildWindowUI(parent = None):
 
@@ -469,6 +463,4 @@ def BuildWindowUI(parent = None):
 
     cmds.button('Delete All Position Prefixes', command = removePosSuffix, w= 155, h= 55)
     cmds.setParent('..')
-
-LaunchNonDockableWindow()
 

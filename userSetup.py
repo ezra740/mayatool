@@ -8,9 +8,9 @@ cmds.commandPort(name="127.0.0.1:7001", stp="mel")
 print("Loading Simple Rename")
 
 import maya.utils
+import MayaTool.maya_ToolMenu as mToolMenu
 
 def startTool():
-    import maya_Tool as renameTool
-    renameTool.CreateToolMenu()
+    mToolMenu.CreateToolMenu()
     print ("Tool is ready!")
-maya.utils.executeDefferred(startTool)
+maya.utils.executeDeferred(startTool)
