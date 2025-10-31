@@ -29,7 +29,7 @@ def bringOriginName(*args):
         if shapes:
             shape = shapes[0]
             base = shape.replace('Shape', '') #Replaces Shape with nothing
-            cmds.rename(obj, base)
+            cmds.rename(obj, base, ignoreShape=True)
 
 #Replacing the Name
 def rename(*args):
@@ -172,7 +172,7 @@ def autoSuffix(*args):
     for obj in lightings:
         if not obj.endswith("_LIGHT"):
             addLight = f"{obj}_LIGHT"
-            cmds.rename(obj, addLight)
+            cmds.rename(obj, addLight, ignoreShape=True)
 
 def removeSuffix(*args):
     geo = cmds.ls('*_GEO', type='transform')
