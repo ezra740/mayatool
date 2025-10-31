@@ -23,7 +23,7 @@ def findName(*args):
 def bringOriginName(*args):
     selected = cmds.ls(type='transform')
     for obj in selected:
-        if cmds.lockNode(obj, query=True, lock=True)[0] or obj in ['persp', 'top', 'front', 'side']: #Ignores the viewports
+        if cmds.lockNode(obj, query=True, lock=True)[0] or obj in ['persp', 'top', 'front', 'side']: #Ignores the viewports 
             continue
         shapes = cmds.listRelatives(obj, shapes=True, fullPath=False)
         if shapes:
@@ -206,10 +206,11 @@ def removeSuffix(*args):
 
 #Adding Positions Macros for Models
 #Uses of class
-class prefixButton():
+class prefixButton(): #UI in Line 423
     def __init__(self, label):
         self.prefix = label
-        self.name = cmds.button(label, w=50, h=50, command = self.addPrefix)
+        self.name = cmds.button(label, w=50, h=50, command = self.addPrefix, ann= f"Adds {self.prefix} as Prefix Position")
+
 
     def addPrefix(self, *args):
         selected = cmds.ls(selection=True)
@@ -298,6 +299,11 @@ def removePosSuffix(*args):
             clearBottom = obj.replace('btm_', '', 1)
             cmds.rename(obj, clearBottom)
 
+############################################ Functions at the Top 
+############################################
+############################################
+############################################
+############################################ UI at the Bottom
 
 def LaunchNonDockableWindow():
     myWindow = 'Maya_UI'
@@ -306,7 +312,7 @@ def LaunchNonDockableWindow():
 
     cmds.window(myWindow, title= 'Simple Renamer Tool', resizeToFitChildren=True, sizeable=True, widthHeight=(300,200))
 
-    
+
     BuildWindowUI()
 
     cmds.showWindow(myWindow)
@@ -327,7 +333,7 @@ def BuildWindowUI(parent = None):
     cmds.formLayout(form, edit = True, attachForm = [(row1, 'top', 10), (row1, 'left', 15)])
 
 
-    cmds.button("Find all name:", command=findName, w=125)
+    cmds.button("Find all name:", command=findName, w=125, ann="Finds the name of what is written in the Search Bar")
     ObjFind = cmds.textField(w=150)
 
     cmds.separator(width=45, style='none')
@@ -340,7 +346,7 @@ def BuildWindowUI(parent = None):
     cmds.formLayout(form, edit = True, attachControl = [(row2,'top', 10, row1)], attachForm =[(row2, 'left', 15)])
 
 
-    cmds.button("Replace Selected with:", command=rename)
+    cmds.button("Replace Selected with:", command=rename, ann="Replaces selected names with what is written in the Text Box")
     ObjNewName = cmds.textField(w=150)
     cmds.iconTextButton(style='iconOnly', image1='Erase.png', ann= "Clear Text Box", command=lambda *_: cmds.textField(ObjNewName, edit=True, text=''))
     cmds.separator(w=8, style='none')
@@ -359,11 +365,11 @@ def BuildWindowUI(parent = None):
 
     row4 = cmds.rowLayout(numberOfColumns=6, columnWidth=(160, 200), adjustableColumn=2)
     cmds.formLayout(form, edit = True, attachControl = [(row4,'top', 10, row3)], attachForm =[(row4, 'left', 30)])
-    cmds.button(label="Add prefix__:",w=100, command=lambda *args:addPrefix())
+    cmds.button(label="Add prefix__:",w=100, command=lambda *args:addPrefix(), ann= "Adds what's written in the LEFT Text Box, as a Prefix")
     prefixBox = cmds.textField()
-    cmds.text(label="(Object)", w=50, backgroundColor=(0.3,0.3,0.3), font="boldLabelFont", ann="Your Selected Object")
+    cmds.text(label="(Object)", w=50, backgroundColor=(0.3,0.3,0.3), font="boldLabelFont", ann="Your Selected Object/s")
     suffixBox = cmds.textField()
-    cmds.button(label="Add :__suffix",w=100, command=lambda *args:addSuffix())
+    cmds.button(label="Add :__suffix",w=100, command=lambda *args:addSuffix(), ann= "Adds what's written in the RIGHT Text Box, as a Suffix")
     cmds.setParent('..')
 
 
@@ -381,21 +387,21 @@ def BuildWindowUI(parent = None):
 
     cmds.optionMenu(label="Select Shelf Tab type, in Scene:", changeCommand=option1)
     cmds.menuItem(label="NONE")
-    cmds.menuItem(label="GEO")
-    cmds.menuItem(label="NURBS")
-    cmds.menuItem(label="CURVES")
-    cmds.menuItem(label="LIGHTS")
+    cmds.menuItem(label="GEO", ann="Selects all Poly Models in the scene")
+    cmds.menuItem(label="NURBS", ann="Selects all Surfaces in the scene")
+    cmds.menuItem(label="CURVES", ann="Selects all Curves in the scene")
+    cmds.menuItem(label="LIGHTS", ann="Selects all Lights in the scene")
 
     cmds.separator(width=5, style='none')
 
     cmds.optionMenu(label="Select all type of Lights:", changeCommand=option2, w=240)
     cmds.menuItem(label="NONE")
-    cmds.menuItem(label="Ambient Light")
-    cmds.menuItem(label="Directional Light")
-    cmds.menuItem(label="Point Light")
-    cmds.menuItem(label="Spot Light")
-    cmds.menuItem(label="Area Light")
-    cmds.menuItem(label="Volume Light")
+    cmds.menuItem(label="Ambient Light", ann="Selects all Ambient Lights in the scene")
+    cmds.menuItem(label="Directional Light", ann="Selects all Directional Lights in the scene")
+    cmds.menuItem(label="Point Light", ann="Selects all Point Lights in the scene")
+    cmds.menuItem(label="Spot Light", ann="Selects all Spot Lights in the scene")
+    cmds.menuItem(label="Area Light", ann="Selects all Area Lights in the scene")
+    cmds.menuItem(label="Volume Light", ann="Selects all Volume Lights in the scene")
     cmds.setParent('..')
 
 
@@ -405,7 +411,7 @@ def BuildWindowUI(parent = None):
 
 
 
-    cmds.button("Add Naming Type Suffixes",command=autoSuffix, w=220, h=50, ann= "Adds all Naming Conventions Type" )
+    cmds.button("Add Naming Type Suffixes",command=autoSuffix, w=220, h=50, ann= "Adds all Naming Conventions Type as Suffixes" )
     cmds.separator(width=5, style='none')
     cmds.button("Remove Naming Type Suffixes", command = removeSuffix, w=220, h=50, ann= "Removes all Naming Conventions Type")
     cmds.setParent('..')
@@ -414,7 +420,7 @@ def BuildWindowUI(parent = None):
     row7 = cmds.rowLayout(numberOfColumns=2, columnWidth=(160, 200), adjustableColumn=True)
     cmds.formLayout(form, edit = True, attachControl = [(row7,'top', 10, row6)], attachForm =[(row7, 'left', 230)])
 
-    prefixButton('top_')
+    prefixButton('top_') #Function in Line 209
     cmds.setParent('..')
 
     row8 = cmds.rowLayout(numberOfColumns=11, columnWidth=(160, 200), adjustableColumn=True)
@@ -461,6 +467,6 @@ def BuildWindowUI(parent = None):
     row12 = cmds.rowLayout(numberOfColumns=2, columnWidth=(160, 200), adjustableColumn=True)
     cmds.formLayout(form, edit = True, attachControl = [(row12,'top', 30, row6)], attachForm =[(row12, 'left', 55)])
 
-    cmds.button('Delete All Position Prefixes', command = removePosSuffix, w= 155, h= 55)
+    cmds.button('Delete All Position Prefixes', command = removePosSuffix, w= 155, h= 55, ann="Deletes all Position Prefixes")
     cmds.setParent('..')
 

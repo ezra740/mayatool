@@ -6,6 +6,6 @@ def CreateToolMenu():
     if cmds.menu(menuName, exists=True):
         cmds.deleteUI(menuName, menu=True)
 
-    customTool = cmds.menu(menuName, label= "My Maya Tool", parent="MayaWindow", tearOff=True)
+    customTool = cmds.menu(menuName, label= "{~CustomScripts~}", parent="MayaWindow", tearOff=True)
 
     cmds.menuItem(label="Launch Window (Not Dockable)", parent=customTool,command=lambda val: mtool.LaunchNonDockableWindow(),image="pythonFamily.png")
