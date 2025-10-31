@@ -69,14 +69,14 @@ def addPrefix(*args):
     prefix = cmds.textField(prefixBox, query=True, text=True)
     selected = cmds.ls(selection=True)
     for obj in selected:
-        cmds.rename(obj, f"{prefix}_{obj}")
+        cmds.rename(obj, f"{prefix}_{obj}", ignoreShape=True)
     cmds.textField(prefixBox, edit=True, text="")
 
 def addSuffix(*args):
     suffix = cmds.textField(suffixBox, query=True, text=True)
     selected = cmds.ls(selection=True)
     for obj in selected:
-        cmds.rename(obj, f"{obj}_{suffix}")
+        cmds.rename(obj, f"{obj}_{suffix}", ignoreShape=True)
     cmds.textField(suffixBox, edit=True, text="")
     
 #Removes all duplicated/ empty underscores, unsure how to delete custom words behind or infront of it
